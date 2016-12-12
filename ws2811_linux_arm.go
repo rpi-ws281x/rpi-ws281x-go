@@ -81,7 +81,7 @@ func (ws2811 *WS2811) Init() error {
 	if res == 0 {
 		return nil
 	}
-	return errors.New(fmt.Errorf("Error ws2811.init.%d", res))
+	return fmt.Errorf("Error ws2811.init.%d", res)
 }
 
 // Render sends a complete frame to the LED Matrix
@@ -90,7 +90,7 @@ func (ws2811 *WS2811) Render() error {
 	if res == 0 {
 		return nil
 	}
-	return errors.New(fmt.Errorf("Error ws2811.render.%d", res))
+	return fmt.Errorf("Error ws2811.render.%d", res)
 }
 
 // Wait waits for render to finish. The time needed for render is given by:
@@ -102,7 +102,7 @@ func (ws2811 *WS2811) Wait() error {
 	if res == 0 {
 		return nil
 	}
-	return errors.New(fmt.Errorf("Error ws2811.wait.%d", res))
+	return fmt.Errorf("Error ws2811.wait.%d", res)
 }
 
 // Fini shuts down the device.
