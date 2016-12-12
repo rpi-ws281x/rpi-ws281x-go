@@ -30,7 +30,7 @@ void ws2811_clear_channel(ws2811_t *ws2811, int chan) {
 
 void ws2811_clear_all(ws2811_t *ws2811) {
 	for (int chan = 0; chan < RPI_PWM_CHANNELS; chan++) {
-		ws2811_clear_channel(ws2811, chan) {
+		ws2811_clear_channel(ws2811, chan);
 	}
 }
 
