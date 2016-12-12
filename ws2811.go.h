@@ -23,7 +23,7 @@ void ws2811_set_led(ws2811_t *ws2811, int chan, int index, uint32_t value) {
 	ws2811->channel[chan].leds[index] = value;
 }
 
-void ws2811_clear(ws2811_t *ws2811, int chan) {
+void ws2811_clear_channel(ws2811_t *ws2811, int chan) {
 	ws2811_channel_t *channel = &ws2811->channel[chan];
 	memset(channel->leds, 0, sizeof(ws2811_led_t) * channel->count);
 }

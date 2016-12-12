@@ -122,5 +122,5 @@ func (ws2811 *WS2811) SetBitmap(a []uint32) {
 
 // Clear sets all pixels to black.
 func (ws2811 *WS2811) Clear() {
-	C.ws2811_clear(ws2811.dev, 0)
+	C.ws2811_clear_channel(ws2811.dev, 0)
 }
