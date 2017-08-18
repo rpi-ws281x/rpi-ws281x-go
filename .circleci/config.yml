@@ -1,9 +1,5 @@
 version: 2
 
-dependencies:
-  pre:
-    - sudo apt-get update; sudo apt-get install build-essential git scons gcc-arm-linux-gnueabihf gcc-multilib-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
-
 jobs:
   build:
     docker:
