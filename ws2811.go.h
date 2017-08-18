@@ -1,4 +1,4 @@
-// Copyright 2016 Jacques Supcik / HEIA-FR
+// Copyright 2017 Jacques Supcik / HEIA-FR
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
