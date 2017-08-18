@@ -8,6 +8,6 @@ jobs:
     steps:
       - checkout
       - run: uname -a
-      - run: lsb_release -a
+      - run: scons
 #      - run: go get -v -t -d ./...
 #      - run: go test -v ./...
