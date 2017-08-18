@@ -8,6 +8,6 @@ jobs:
     steps:
       - checkout
       - run: uname -a
-      - run: apt install -y build-essential git scons gcc-arm-linux-gnueabihf gcc-multilib-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+      - run: sudo apt install -y build-essential git scons gcc-arm-linux-gnueabihf gcc-multilib-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
 #      - run: go get -v -t -d ./...
 #      - run: go test -v ./...
