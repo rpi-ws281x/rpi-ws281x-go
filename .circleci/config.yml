@@ -38,7 +38,4 @@ jobs:
           environment:
             GOOS: "linux"
             GOARCH: "arm"
-      - run: gometalinter ws2811.go
 
-#      - run: go get -v -t -d ./...
-#      - run: go test -v ./...
