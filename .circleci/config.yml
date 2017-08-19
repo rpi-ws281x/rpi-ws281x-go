@@ -9,8 +9,8 @@ jobs:
     steps:
       - run: |
           sudo apt-get install build-essential git scons binutils-arm-none-eabi gcc-arm-none-eabi
-          mkdir lib
-          cd lib
+          mkdir -p ${HOME}/src/lib
+          cd ${HOME}/src/lib
           git clone https://github.com/jgarff/rpi_ws281x.git
 
       - checkout
