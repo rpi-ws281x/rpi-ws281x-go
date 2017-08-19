@@ -46,5 +46,5 @@ jobs:
             CXX_FOR_TARGET: arm-linux-gnueabihf-g++
             CPATH: /usr/local/include
             LIBRARY_PATH: /usr/local/lib
-      - run: find /go
-      - run: gometalinter ws2811.go
+      - store_artifacts:
+          path: /go/pkg/linux_arm/github.com/supcik/ws2811.a
