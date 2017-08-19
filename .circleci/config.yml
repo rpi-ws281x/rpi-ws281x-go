@@ -38,4 +38,4 @@ jobs:
           environment:
             GOOS: "linux"
             GOARCH: "arm"
-
+      - run: find /go
