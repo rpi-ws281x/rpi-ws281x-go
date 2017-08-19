@@ -8,7 +8,12 @@ jobs:
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - run: |
-          sudo apt-get install build-essential git scons binutils-arm-none-eabi gcc-arm-none-eabi curl
+          sudo apt-get install build-essential git scons curl
+          echo "deb http://emdebian.org/tools/debian/ jessie main" | sudo tee /etc/apt/sources.list.d/crosstools.list
+          curl http://emdebian.org/tools/debian/emdebian-toolchain-archive.key | sudo apt-key add -
+          sudo dpkg --add-architecture armhf
+          sudo apt-get update
+          sudo apt-get install crossbuild-essential-armhf
           mkdir -p ${HOME}/src/lib
           cd ${HOME}/src/lib
           git clone https://github.com/jgarff/rpi_ws281x.git
@@ -16,7 +21,7 @@ jobs:
           git reset --hard 389f074e41f41ed7b5e9b8c7a2fd06ccfa3a2eaa
           curl https://patch-diff.githubusercontent.com/raw/jgarff/rpi_ws281x/pull/213.diff | patch
           curl https://patch-diff.githubusercontent.com/raw/jgarff/rpi_ws281x/pull/214.diff | patch
-          scons TOOLCHAIN=arm-none-eabi
+          scons TOOLCHAIN=arm-linux-gnueabihf
           sudo scons install
 
       - checkout
