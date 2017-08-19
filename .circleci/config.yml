@@ -26,7 +26,7 @@ jobs:
           sudo cp *.a /usr/local/lib
           sudo mkdir -p /usr/local/include
           sudo cp *.h /usr/local/include
-          tar czf rpi_ws281x.tgz -C usr/local lib/* include/*
+          tar czf rpi_ws281x.tgz -C /usr/local lib/* include/*
       - store_artifacts:
           path: ${HOME}/src/lib/rpi_ws281x.tgz
 
