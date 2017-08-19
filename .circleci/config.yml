@@ -29,6 +29,8 @@ jobs:
             sudo mkdir -p /usr/local/include
             sudo cp *.h /usr/local/include
       - checkout
+      - run: go get -u github.com/alecthomas/gometalinter
+      - run: gometalinter --install
       - run: sudo chown -R circleci:circleci /usr/local/go/pkg
       - run:
           name: Building librarie
@@ -39,10 +41,10 @@ jobs:
             GOOS: "linux"
             GOARCH: "arm"
             CGO_ENABLED: 1
-            CC_FOR_TARGET: arm-linux-gnueabihf-gcc
             CC: arm-linux-gnueabihf-gcc
+            CC_FOR_TARGET: arm-linux-gnueabihf-gcc
             CXX_FOR_TARGET: arm-linux-gnueabihf-g++
             CPATH: /usr/local/include
             LIBRARY_PATH: /usr/local/lib
-
       - run: find /go
+      - run: gometalinter ws2811.go
