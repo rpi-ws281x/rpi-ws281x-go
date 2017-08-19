@@ -29,6 +29,8 @@ jobs:
             sudo mkdir -p /usr/local/include
             sudo cp *.h /usr/local/include
       - checkout
+      - run: go get -u github.com/alecthomas/gometalinter
+      - run: gometalinter --install
       - run: sudo chown -R circleci:circleci /usr/local/go/pkg
       - run:
           name: Building librarie
@@ -36,6 +38,7 @@ jobs:
           environment:
             GOOS: "linux"
             GOARCH: "arm"
+      - run: gometalinter ./...
 
 #      - run: go get -v -t -d ./...
 #      - run: go test -v ./...
