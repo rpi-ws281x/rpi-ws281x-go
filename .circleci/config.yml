@@ -8,10 +8,16 @@ jobs:
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - run: |
-          sudo apt-get install build-essential git scons binutils-arm-none-eabi gcc-arm-none-eabi
+          sudo apt-get install build-essential git scons binutils-arm-none-eabi gcc-arm-none-eabi curl
           mkdir -p ${HOME}/src/lib
           cd ${HOME}/src/lib
           git clone https://github.com/jgarff/rpi_ws281x.git
+          cd rpi_ws281x
+          git reset --hard 389f074e41f41ed7b5e9b8c7a2fd06ccfa3a2eaa
+          curl https://patch-diff.githubusercontent.com/raw/jgarff/rpi_ws281x/pull/213.diff | patch
+          curl https://patch-diff.githubusercontent.com/raw/jgarff/rpi_ws281x/pull/214.diff | patch
+          scons TOOLCHAIN=arm-none-eabi
+          sudo scons install
 
       - checkout
 #      - run: go get -v -t -d ./...
