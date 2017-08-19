@@ -31,7 +31,7 @@ jobs:
       - checkout
       - run:
           name: Building librarie
-          command: go get -v ./...
+          command: sudo go get -v ./...
           environment:
             GOOS: "linux"
             GOARCH: "arm"
