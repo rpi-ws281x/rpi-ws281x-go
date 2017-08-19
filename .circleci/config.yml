@@ -29,12 +29,12 @@ jobs:
             sudo mkdir -p /usr/local/include
             sudo cp *.h /usr/local/include
       - checkout
-      - run: go get -u github.com/alecthomas/gometalinter
-      - run: gometalinter --install
       - run: sudo chown -R circleci:circleci /usr/local/go/pkg
       - run:
           name: Building librarie
-          command: go get -v ./...
+          command: |
+            go get -v ./...
+            go build
           environment:
             GOOS: "linux"
             GOARCH: "arm"
