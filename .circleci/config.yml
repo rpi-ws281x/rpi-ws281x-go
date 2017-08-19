@@ -22,10 +22,10 @@ jobs:
           curl https://patch-diff.githubusercontent.com/raw/jgarff/rpi_ws281x/pull/213.diff | patch
           curl https://patch-diff.githubusercontent.com/raw/jgarff/rpi_ws281x/pull/214.diff | patch
           scons TOOLCHAIN=arm-linux-gnueabihf
-          mkdir -p /usr/local/lib
-          cp *.a /usr/local/lib
-          mkdir -p /usr/local/include
-          cp *.h usr/local/include
+          sudo mkdir -p /usr/local/lib
+          sudo cp *.a /usr/local/lib
+          sudo mkdir -p /usr/local/include
+          sudo cp *.h usr/local/include
           tar czf rpi_ws281x.tgz -C usr/local lib/* include/*
       - store_artifacts:
           path: ${HOME}/src/lib/rpi_ws281x.tgz
