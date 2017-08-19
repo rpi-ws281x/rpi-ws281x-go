@@ -29,9 +29,10 @@ jobs:
             sudo mkdir -p /usr/local/include
             sudo cp *.h /usr/local/include
       - checkout
+      - run: sudo chown -R circleci:circleci /usr/local/go/pkg
       - run:
           name: Building librarie
-          command: sudo go get -v ./...
+          command: go get -v ./...
           environment:
             GOOS: "linux"
             GOARCH: "arm"
