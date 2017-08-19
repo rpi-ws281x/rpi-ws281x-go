@@ -7,6 +7,11 @@ jobs:
       
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
+      - run: |
+          sudo apt-get update;
+          sudo apt-get install build-essential git scons gcc-arm-linux-gnueabihf \
+            gcc-multilib-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+
       - checkout
 #      - run: go get -v -t -d ./...
 #      - run: go test -v ./...
