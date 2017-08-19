@@ -29,6 +29,10 @@ jobs:
             sudo mkdir -p /usr/local/include
             sudo cp *.h /usr/local/include
       - checkout
+      -run: |
+          echo ${HOME}
+          find /go
+          find ~/go
       - run:
           name: Building librarie
           command: go build
