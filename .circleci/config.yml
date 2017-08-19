@@ -5,7 +5,7 @@ jobs:
     docker:
       - image: circleci/golang:1.8
       
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/supcik/ws2811
     steps:
       - run:
           name: Building and installing C librairie
@@ -29,13 +29,9 @@ jobs:
             sudo mkdir -p /usr/local/include
             sudo cp *.h /usr/local/include
       - checkout
-      - run: |
-          echo ${HOME}
-          find /go
-          find ~/go
       - run:
           name: Building librarie
-          command: go build
+          command: go get -v ./...
           environment:
             GOOS: "linux"
             GOARCH: "arm"
