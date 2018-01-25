@@ -58,7 +58,7 @@ type Option struct {
 	Brightness int
 	StripeType int
 	Invert     bool
-	Gamma      []uint8
+	Gamma      []byte
 }
 
 // WS2811 represent the ws2811 device
@@ -103,7 +103,7 @@ func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
 		ws2811.dev.channel[0].invert = C.int(0)
 	}
 	if opt.Gamma != nil {
-		ws2811.dev.gamma = C.Pointer(&opt.Gamma[0])
+		ws2811.dev.gamma = C.Pointer(unsafe.Pointer(&opt.Gamma[0]))
 	}
 	return
 }
