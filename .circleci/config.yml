@@ -3,9 +3,9 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.8
+      - image: circleci/golang:1.9
       
-    working_directory: /go/src/github.com/supcik/ws2811
+    working_directory: /go/src/github.com/supcik/rpi_ws281x_go
     steps:
       - run:
           name: Building and installing C librairie
@@ -20,9 +20,6 @@ jobs:
             cd ${HOME}/src/lib
             git clone https://github.com/jgarff/rpi_ws281x.git
             cd rpi_ws281x
-            git reset --hard 389f074e41f41ed7b5e9b8c7a2fd06ccfa3a2eaa
-            curl https://patch-diff.githubusercontent.com/raw/jgarff/rpi_ws281x/pull/213.diff | patch
-            curl https://patch-diff.githubusercontent.com/raw/jgarff/rpi_ws281x/pull/214.diff | patch
             scons TOOLCHAIN=arm-linux-gnueabihf
             sudo mkdir -p /usr/local/lib
             sudo cp *.a /usr/local/lib
@@ -40,7 +37,7 @@ jobs:
           environment:
             GOOS: "linux"
             GOARCH: "arm"
-            CGO_ENABLED: 1
+            CGO_ENABLED: "1"
             CC: arm-linux-gnueabihf-gcc
             CC_FOR_TARGET: arm-linux-gnueabihf-gcc
             CXX_FOR_TARGET: arm-linux-gnueabihf-g++

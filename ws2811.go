@@ -35,12 +35,18 @@ const (
 	DefaultDmaNum = 5
 	// TargetFreq is the target frequency. It is usually 800kHz (800000), and an go as low as 400000
 	TargetFreq = 800000
-	StripRGB   = 0x100800 // StripRGB is the RGB Mode
-	StripRBG   = 0x100008 // StripRBG is the RBG Mode
-	StripGRB   = 0x081000 // StripGRB is the GRB Mode
-	StripGBR   = 0x080010 // StripGBR is the GBR Mode
-	StripBRG   = 0x001008 // StripBRG is the BRG Mode
-	StripBGR   = 0x000810 // StripBGR is the BGR Mode
+	// StripRGB is the RGB Mode
+	StripRGB = 0x100800
+	// StripRBG is the RBG Mode
+	StripRBG = 0x100008
+	// StripGRB is the GRB Mode
+	StripGRB = 0x081000
+	// StripGBR is the GBR Mode
+	StripGBR = 0x080010
+	// StripBRG is the BRG Mode
+	StripBRG = 0x001008
+	// StripBGR is the BGR Mode
+	StripBGR = 0x000810
 )
 
 // Option is the arguments for creating an instance of WS2811.
@@ -52,6 +58,7 @@ type Option struct {
 	Brightness int
 	StripeType int
 	Invert     bool
+	Gamma      []uint8
 }
 
 // WS2811 represent the ws2811 device
@@ -68,31 +75,7 @@ var DefaultOptions = Option{
 	Brightness: 64,
 	StripeType: StripGRB,
 	Invert:     false,
-}
-
-var gamma8 = []uint32{
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
-	2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5,
-	5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10,
-	10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-	17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-	25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-	37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-	51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-	69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-	90, 92, 93, 95, 96, 98, 99, 101, 102, 104, 105, 107, 109, 110, 112, 114,
-	115, 117, 119, 120, 122, 124, 126, 127, 129, 131, 133, 135, 137, 138, 140, 142,
-	144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 167, 169, 171, 173, 175,
-	177, 180, 182, 184, 186, 189, 191, 193, 196, 198, 200, 203, 205, 208, 210, 213,
-	215, 218, 220, 223, 225, 228, 231, 233, 236, 239, 241, 244, 247, 249, 252, 255}
-
-func gammaCorrected(color uint32) uint32 {
-	r := (color >> 16) & 0xff
-	g := (color >> 8) & 0xff
-	b := (color >> 0) & 0xff
-	return gamma8[r]<<16 + gamma8[g]<<8 + gamma8[b]
+	Gamma:      gamma8,
 }
 
 // MakeWS2811 create an instance of WS2811.
@@ -104,6 +87,7 @@ func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
 		err = errors.New("Unable to allocate memory")
 		return
 	}
+	// Reset structure
 	C.memset(unsafe.Pointer(ws2811.dev), 0, C.sizeof_ws2811_t)
 
 	ws2811.dev.freq = C.uint32_t(opt.Frequency)
@@ -117,6 +101,9 @@ func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
 		ws2811.dev.channel[0].invert = C.int(1)
 	} else {
 		ws2811.dev.channel[0].invert = C.int(0)
+	}
+	if opt.Gamma != nil {
+		ws2811.dev.gamma = C.Pointer(&opt.Gamma[0])
 	}
 	return
 }
