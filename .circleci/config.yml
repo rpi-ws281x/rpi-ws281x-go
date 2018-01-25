@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.8
       
     working_directory: /go/src/github.com/supcik/rpi_ws281x_go
     steps:
