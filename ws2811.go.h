@@ -16,8 +16,21 @@
 // https://github.com/jgarff/rpi_ws281x
  
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ws2811.h>
+
+ws2811_t* ws2811_new() {
+	return (ws2811_t*) calloc(1, sizeof(ws2811_t));
+}
+
+void ws2811_free(ws2811_t* device) {
+	free(device);
+}
+
+ws2811_channel_t* ws2811_channel(ws2811_t* device, int i) {
+	return &device->channel[i];
+}
 
 void ws2811_set_led(ws2811_t *ws2811, int chan, int index, uint32_t value) {
 	ws2811->channel[chan].leds[index] = value;

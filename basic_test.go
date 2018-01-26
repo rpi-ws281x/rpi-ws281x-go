@@ -44,10 +44,9 @@ func TestSnake(t *testing.T) {
 
 	size := *width * *height
 	opt := DefaultOptions
-	opt.Brightness = *brightness
-	opt.LedCount = size
-	opt.Brightness = *gpioPin
-	opt.StripeType = StripGRB
+	opt.Channels[0].Brightness = *brightness
+	opt.Channels[0].LedCount = size
+	opt.Channels[0].GpioPin = *gpioPin
 
 	ws, err := MakeWS2811(&opt)
 	if err != nil {

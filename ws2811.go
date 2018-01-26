@@ -33,32 +33,65 @@ import (
 const (
 	// DefaultDmaNum is the default DMA number. Usually, this is 5 ob the Raspberry Pi
 	DefaultDmaNum = 5
+	// RpiPwmChannels is the number of PWM channels in the Raspberry Pi
+	RpiPwmChannels = 2
 	// TargetFreq is the target frequency. It is usually 800kHz (800000), and an go as low as 400000
 	TargetFreq = 800000
-	// StripRGB is the RGB Mode
-	StripRGB = 0x100800
-	// StripRBG is the RBG Mode
-	StripRBG = 0x100008
-	// StripGRB is the GRB Mode
-	StripGRB = 0x081000
-	// StripGBR is the GBR Mode
-	StripGBR = 0x080010
-	// StripBRG is the BRG Mode
-	StripBRG = 0x001008
-	// StripBGR is the BGR Mode
-	StripBGR = 0x000810
 )
 
-// Option is the arguments for creating an instance of WS2811.
-type Option struct {
-	Frequency  int
-	DmaNum     int
-	GpioPin    int
-	LedCount   int
-	Brightness int
+// StateDesc is a map from a return state to its string description.
+var StateDesc = map[int]string{
+	0:   "Success",
+	-1:  "Generic failure",
+	-2:  "Out of memory",
+	-3:  "Hardware revision is not supported",
+	-4:  "Memory lock failed",
+	-5:  "mmap() failed",
+	-6:  "Unable to map registers into userspace",
+	-7:  "Unable to initialize GPIO",
+	-8:  "Unable to initialize PWM",
+	-9:  "Failed to create mailbox device",
+	-10: "DMA error",
+	-11: "Selected GPIO not possible",
+	-12: "Unable to initialize PCM",
+	-13: "Unable to initialize SPI",
+	-14: "SPI transfer error",
+}
+
+// ChannelOption is the list of channel options
+type ChannelOption struct {
+	// GpioPin is the GPIO Pin with PWM alternate function, 0 if unused
+	GpioPin int
+	// Invert inverts output signal
+	Invert bool
+	// LedCount is the number of LEDs, 0 if channel is unused
+	LedCount int
+	// StripeType is the strip color layout -- one of WS2811StripXXX constants
 	StripeType int
-	Invert     bool
-	Gamma      []byte
+	// Brightness is the maximum brightness of the LEDs. Value between 0 and 255
+	Brightness int
+	// WShift is the white shift value
+	WShift int
+	// RShift is the red shift value
+	RShift int
+	// GShift is the green shift value
+	GShift int
+	// BShift is blue shift value
+	BShift int
+	// Gamma is the gamma correction table
+	Gamma []byte
+}
+
+// Option is the list of device options
+type Option struct {
+	// RenderWaitTime is the time in µs before the next render can run
+	RenderWaitTime int
+	// Frequency is the required output frequency
+	Frequency int
+	// DmaNum is the number of a DMA _not_ already in use
+	DmaNum int
+	// Channles are channels options
+	Channels []ChannelOption
 }
 
 // WS2811 represent the ws2811 device
@@ -68,42 +101,54 @@ type WS2811 struct {
 
 // DefaultOptions defines sensible default options for MakeWS2811
 var DefaultOptions = Option{
-	Frequency:  800000,
-	DmaNum:     5,
-	GpioPin:    18,
-	LedCount:   16,
-	Brightness: 64,
-	StripeType: StripGRB,
-	Invert:     false,
-	Gamma:      gamma8,
+	Frequency: 800000,
+	DmaNum:    5,
+	Channels: []ChannelOption{
+		ChannelOption{
+			GpioPin:    18,
+			LedCount:   16,
+			Brightness: 64,
+			StripeType: WS2812Strip,
+			Invert:     false,
+			Gamma:      gamma8,
+		},
+	},
 }
 
 // MakeWS2811 create an instance of WS2811.
 func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
-	err = nil
 	ws2811 = new(WS2811)
-	ws2811.dev = (*C.ws2811_t)(C.malloc(C.sizeof_ws2811_t))
+	ws2811.dev = C.ws2811_new()
 	if ws2811 == nil {
 		err = errors.New("Unable to allocate memory")
 		return
 	}
 	// Reset structure
-	C.memset(unsafe.Pointer(ws2811.dev), 0, C.sizeof_ws2811_t)
+	C.memset(unsafe.Pointer(ws2811.dev), 0, C.sizeof_ws2811_t) // #nosec
 
 	ws2811.dev.freq = C.uint32_t(opt.Frequency)
 	ws2811.dev.dmanum = C.int(opt.DmaNum)
 
-	ws2811.dev.channel[0].gpionum = C.int(opt.GpioPin)
-	ws2811.dev.channel[0].count = C.int(opt.LedCount)
-	ws2811.dev.channel[0].brightness = C.uint8_t(opt.Brightness)
-	ws2811.dev.channel[0].strip_type = C.int(opt.StripeType)
-	if opt.Invert {
-		ws2811.dev.channel[0].invert = C.int(1)
-	} else {
-		ws2811.dev.channel[0].invert = C.int(0)
-	}
-	if opt.Gamma != nil {
-		ws2811.dev.channel[0].gamma = (*C.uint8_t)(&opt.Gamma[0])
+	for i, cOpt := range opt.Channels {
+		c := C.ws2811_channel(ws2811.dev, C.int(i))
+		_ = c // to suppress gotype warning
+		c.gpionum = C.int(cOpt.GpioPin)
+		c.count = C.int(cOpt.LedCount)
+		c.brightness = C.uint8_t(cOpt.Brightness)
+		c.strip_type = C.int(cOpt.StripeType)
+		c.wshift = C.uint8_t(cOpt.WShift)
+		c.rshift = C.uint8_t(cOpt.RShift)
+		c.gshift = C.uint8_t(cOpt.GShift)
+		c.bshift = C.uint8_t(cOpt.BShift)
+
+		if cOpt.Invert {
+			c.invert = C.int(1)
+		} else {
+			c.invert = C.int(0)
+		}
+		if cOpt.Gamma != nil {
+			c.gamma = (*C.uint8_t)(&cOpt.Gamma[0])
+		}
 	}
 	return
 }
@@ -114,7 +159,7 @@ func (ws2811 *WS2811) Init() error {
 	if res == 0 {
 		return nil
 	}
-	return fmt.Errorf("Error ws2811.init.%d", res)
+	return fmt.Errorf("Error ws2811.init: %d (%v)", res, StatusDesc(res))
 }
 
 // Render sends a complete frame to the LED Matrix
@@ -123,7 +168,7 @@ func (ws2811 *WS2811) Render() error {
 	if res == 0 {
 		return nil
 	}
-	return fmt.Errorf("Error ws2811.render.%d", res)
+	return fmt.Errorf("Error ws2811.render: %d (%v)", res, StatusDesc(res))
 }
 
 // Wait waits for render to finish. The time needed for render is given by:
@@ -135,7 +180,7 @@ func (ws2811 *WS2811) Wait() error {
 	if res == 0 {
 		return nil
 	}
-	return fmt.Errorf("Error ws2811.wait.%d", res)
+	return fmt.Errorf("Error ws2811.wait: %d (%v)", res, StatusDesc(res))
 }
 
 // Fini shuts down the device.
@@ -150,10 +195,19 @@ func (ws2811 *WS2811) SetLed(index int, value uint32) {
 
 // SetBitmap defines the color of a all pixels.
 func (ws2811 *WS2811) SetBitmap(a []uint32) {
-	C.ws2811_set_bitmap(ws2811.dev, 0, unsafe.Pointer(&a[0]), C.int(len(a)*4))
+	C.ws2811_set_bitmap(ws2811.dev, 0, unsafe.Pointer(&a[0]), C.int(len(a)*4)) // #nosec
 }
 
 // Clear sets all pixels to black.
 func (ws2811 *WS2811) Clear() {
 	C.ws2811_clear_channel(ws2811.dev, 0)
+}
+
+// StatusDesc returns the description of a status code
+func StatusDesc(code int) string {
+	desc, ok := StateDesc[code]
+	if ok {
+		return desc
+	}
+	return "unknown"
 }

@@ -37,7 +37,7 @@ jobs:
             sudo chown -R circleci:circleci /usr/local/go/pkg
             go get -v ./...
             go build
-            gometalinter ./... || true
+            gometalinter ./...
           environment:
             GOOS: "linux"
             GOARCH: "arm"
