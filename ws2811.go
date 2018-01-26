@@ -145,16 +145,12 @@ func (ws2811 *WS2811) Fini() {
 
 // SetLed defines the color of a given pixel.
 func (ws2811 *WS2811) SetLed(index int, value uint32) {
-	C.ws2811_set_led(ws2811.dev, 0, C.int(index), C.uint32_t(gammaCorrected(value)))
+	C.ws2811_set_led(ws2811.dev, 0, C.int(index), C.uint32_t(value))
 }
 
 // SetBitmap defines the color of a all pixels.
 func (ws2811 *WS2811) SetBitmap(a []uint32) {
-	t := make([]uint32, len(a))
-	for i, color := range a {
-		t[i] = gammaCorrected(color)
-	}
-	C.ws2811_set_bitmap(ws2811.dev, 0, unsafe.Pointer(&t[0]), C.int(len(t)*4))
+	C.ws2811_set_bitmap(ws2811.dev, 0, unsafe.Pointer(&a[0]), C.int(len(a)*4))
 }
 
 // Clear sets all pixels to black.
