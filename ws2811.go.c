@@ -12,23 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This header file is a wrapper for the rpi_ws281x library:
+// This implements the wrapper for the rpi_ws281x library:
 // https://github.com/jgarff/rpi_ws281x
  
-
-#pragma once
-#ifndef WS2811_GO_H_
-#define WS2811_GO_H_
-
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ws2811.h>
+#include <ws2811.go.h>
 
 // ws2811_leds returns a reference (address) of the LEDs array of a channel.
-extern ws2811_led_t* ws2811_leds(const ws2811_t* ws2811, int chan);
+ws2811_led_t* ws2811_leds(const ws2811_t* ws2811, int chan) {
+	return ws2811->channel[chan].leds;
+}
 
 // ws2811_leds returns a reference (address) of the LEDs array of a channel.
-extern int ws2811_leds_count(const ws2811_t* ws2811, int chan);
-
-#endif // WS2811_GO_H_
+int ws2811_leds_count(const ws2811_t* ws2811, int chan) {
+	return ws2811->channel[chan].count;
+}

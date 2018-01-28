@@ -1,4 +1,4 @@
-// Copyright 2017 Jacques Supcik / HEIA-FR
+// Copyright 2018 Jacques Supcik / HEIA-FR
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -96,7 +96,9 @@ type Option struct {
 
 // WS2811 represent the ws2811 device
 type WS2811 struct {
-	dev *C.ws2811_t
+	dev         *C.ws2811_t
+	initialized bool
+	channels    [][]uint32
 }
 
 // DefaultOptions defines sensible default options for MakeWS2811
@@ -117,58 +119,76 @@ var DefaultOptions = Option{
 
 // MakeWS2811 create an instance of WS2811.
 func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
-	ws2811 = new(WS2811)
-	ws2811.dev = C.ws2811_new()
+	ws2811 = &WS2811{
+		initialized: false,
+	}
 	if ws2811 == nil {
 		err = errors.New("Unable to allocate memory")
-		return
+		return nil, err
 	}
-	// Reset structure
+	// Allocate and reset structure
+	ws2811.dev = (*C.ws2811_t)(C.malloc(C.sizeof_ws2811_t))
 	C.memset(unsafe.Pointer(ws2811.dev), 0, C.sizeof_ws2811_t) // #nosec
 
 	ws2811.dev.freq = C.uint32_t(opt.Frequency)
 	ws2811.dev.dmanum = C.int(opt.DmaNum)
 
 	for i, cOpt := range opt.Channels {
-		c := C.ws2811_channel(ws2811.dev, C.int(i))
-		_ = c // to suppress gotype warning
-		c.gpionum = C.int(cOpt.GpioPin)
-		c.count = C.int(cOpt.LedCount)
-		c.brightness = C.uint8_t(cOpt.Brightness)
-		c.strip_type = C.int(cOpt.StripeType)
-		c.wshift = C.uint8_t(cOpt.WShift)
-		c.rshift = C.uint8_t(cOpt.RShift)
-		c.gshift = C.uint8_t(cOpt.GShift)
-		c.bshift = C.uint8_t(cOpt.BShift)
+		_ = i // prevent gotype error
+		ws2811.dev.channel[i].gpionum = C.int(cOpt.GpioPin)
+		ws2811.dev.channel[i].count = C.int(cOpt.LedCount)
+		ws2811.dev.channel[i].brightness = C.uint8_t(cOpt.Brightness)
+		ws2811.dev.channel[i].strip_type = C.int(cOpt.StripeType)
+		ws2811.dev.channel[i].wshift = C.uint8_t(cOpt.WShift)
+		ws2811.dev.channel[i].rshift = C.uint8_t(cOpt.RShift)
+		ws2811.dev.channel[i].gshift = C.uint8_t(cOpt.GShift)
+		ws2811.dev.channel[i].bshift = C.uint8_t(cOpt.BShift)
 
 		if cOpt.Invert {
-			c.invert = C.int(1)
+			ws2811.dev.channel[i].invert = C.int(1)
 		} else {
-			c.invert = C.int(0)
+			ws2811.dev.channel[i].invert = C.int(0)
 		}
 		if cOpt.Gamma != nil {
-			c.gamma = (*C.uint8_t)(&cOpt.Gamma[0])
+			// allocate and copy gamma table. The memory will be freed by C.ws2811_fini().
+			m := (*C.uint8_t)(C.malloc(C.size_t(256)))
+			ws2811.dev.channel[i].gamma = m
+			C.memcpy(unsafe.Pointer(m), unsafe.Pointer(&cOpt.Gamma[0]), C.size_t(256)) // #nosec
 		}
 	}
-	return
+	return ws2811, err
 }
 
 // Init initialize the device. It should be called only once before any other method.
 func (ws2811 *WS2811) Init() error {
-	res := int(C.ws2811_init(ws2811.dev))
-	if res == 0 {
-		return nil
+	if ws2811.initialized {
+		return errors.New("Already initialized")
 	}
-	return fmt.Errorf("Error ws2811.init: %d (%v)", res, StatusDesc(res))
+	res := int(C.ws2811_init(ws2811.dev))
+	if res != 0 {
+		return fmt.Errorf("Error ws2811.init: %d (%v)", res, StatusDesc(res))
+	}
+	ws2811.initialized = true
+	ws2811.channels = make([][]uint32, RpiPwmChannels)
+	for i := 0; i < RpiPwmChannels; i++ {
+		var ledsArray *C.ws2811_led_t = C.ws2811_leds(ws2811.dev, C.int(i))
+		length := int(C.ws2811_leds_count(ws2811.dev, C.int(i)))
+		// convert the led C array into a golang slice:
+		// https://github.com/golang/go/wiki/cgo#turning-c-arrays-into-go-slices
+		// 1 << 28 is the largest pseudo-size that we can use. If we try a larger number,
+		// then we get a compile error: "type [N]uint32 too large".
+		ws2811.channels[i] = (*[1 << 28]uint32)(unsafe.Pointer(ledsArray))[:length:length] // #nosec
+	}
+	return nil
 }
 
 // Render sends a complete frame to the LED Matrix
 func (ws2811 *WS2811) Render() error {
 	res := int(C.ws2811_render(ws2811.dev))
-	if res == 0 {
-		return nil
+	if res != 0 {
+		return fmt.Errorf("Error ws2811.render: %d (%v)", res, StatusDesc(res))
 	}
-	return fmt.Errorf("Error ws2811.render: %d (%v)", res, StatusDesc(res))
+	return nil
 }
 
 // Wait waits for render to finish. The time needed for render is given by:
@@ -177,30 +197,43 @@ func (ws2811 *WS2811) Render() error {
 // See https://cdn-shop.adafruit.com/datasheets/WS2811.pdf for more details.
 func (ws2811 *WS2811) Wait() error {
 	res := int(C.ws2811_wait(ws2811.dev))
-	if res == 0 {
-		return nil
+	if res != 0 {
+		return fmt.Errorf("Error ws2811.wait: %d (%v)", res, StatusDesc(res))
+
 	}
-	return fmt.Errorf("Error ws2811.wait: %d (%v)", res, StatusDesc(res))
+	return nil
 }
 
-// Fini shuts down the device.
+// Fini shuts down the device and frees memory.
 func (ws2811 *WS2811) Fini() {
 	C.ws2811_fini(ws2811.dev)
+	// release the memory allocated by MakeWS2811. Note that we should not release
+	// ws2811.dev.channel[i].gamma (also allocated by MakeWS2811) because C.ws2811_fini
+	// already releases this data.
+	C.free(unsafe.Pointer(ws2811.dev)) // #nosec
+	ws2811.initialized = false
 }
 
 // SetLed defines the color of a given pixel.
-func (ws2811 *WS2811) SetLed(index int, value uint32) {
-	C.ws2811_set_led(ws2811.dev, 0, C.int(index), C.uint32_t(value))
+func (ws2811 *WS2811) SetLed(channel int, index int, value uint32) {
+	ws2811.channels[channel][index] = value
 }
 
 // SetBitmap defines the color of a all pixels.
-func (ws2811 *WS2811) SetBitmap(a []uint32) {
-	C.ws2811_set_bitmap(ws2811.dev, 0, unsafe.Pointer(&a[0]), C.int(len(a)*4)) // #nosec
+func (ws2811 *WS2811) SetBitmap(channel int, a []uint32) {
+	copy(ws2811.channels[channel], a)
+}
+
+// SetBitmapSlice defines the color of a slice of pixels.
+func (ws2811 *WS2811) SetBitmapSlice(channel int, offset int, a []uint32) {
+	copy(ws2811.channels[channel][offset:], a)
 }
 
 // Clear sets all pixels to black.
-func (ws2811 *WS2811) Clear() {
-	C.ws2811_clear_channel(ws2811.dev, 0)
+func (ws2811 *WS2811) Clear(channel int) {
+	for i := 0; i < len(ws2811.channels[channel]); i++ {
+		ws2811.channels[channel][i] = 0
+	}
 }
 
 // StatusDesc returns the description of a status code

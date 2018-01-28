@@ -26,18 +26,13 @@ jobs:
             sudo mkdir -p /usr/local/include
             sudo cp *.h /usr/local/include
       - checkout
-      - run: 
-          name: Install linter
-          command: |
-            go get -u github.com/alecthomas/gometalinter
-            gometalinter --install
+
       - run:
           name: Building librarie
           command: |
             sudo chown -R circleci:circleci /usr/local/go/pkg
             go get -v ./...
             go build
-            gometalinter ./...
           environment:
             GOOS: "linux"
             GOARCH: "arm"
@@ -47,5 +42,14 @@ jobs:
             CXX_FOR_TARGET: arm-linux-gnueabihf-g++
             CPATH: /usr/local/include
             LIBRARY_PATH: /usr/local/lib
+      - run: 
+          name: Install linter
+          command: |
+            go get -u github.com/alecthomas/gometalinter
+            gometalinter --install
+      - run: 
+          name: lint
+          command: |
+            gometalinter ./...  
       - store_artifacts:
           path: /go/pkg/linux_arm/github.com/supcik/rpi_ws281x_go.a
