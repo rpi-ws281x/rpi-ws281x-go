@@ -98,7 +98,7 @@ type Option struct {
 type WS2811 struct {
 	dev         *C.ws2811_t
 	initialized bool
-	channels    [][]uint32
+	Channels    [][]uint32
 }
 
 // DefaultOptions defines sensible default options for MakeWS2811
@@ -169,7 +169,7 @@ func (ws2811 *WS2811) Init() error {
 		return fmt.Errorf("Error ws2811.init: %d (%v)", res, StatusDesc(res))
 	}
 	ws2811.initialized = true
-	ws2811.channels = make([][]uint32, RpiPwmChannels)
+	ws2811.Channels = make([][]uint32, RpiPwmChannels)
 	for i := 0; i < RpiPwmChannels; i++ {
 		var ledsArray *C.ws2811_led_t = C.ws2811_leds(ws2811.dev, C.int(i))
 		length := int(C.ws2811_leds_count(ws2811.dev, C.int(i)))
@@ -177,7 +177,7 @@ func (ws2811 *WS2811) Init() error {
 		// https://github.com/golang/go/wiki/cgo#turning-c-arrays-into-go-slices
 		// 1 << 28 is the largest pseudo-size that we can use. If we try a larger number,
 		// then we get a compile error: "type [N]uint32 too large".
-		ws2811.channels[i] = (*[1 << 28]uint32)(unsafe.Pointer(ledsArray))[:length:length] // #nosec
+		ws2811.Channels[i] = (*[1 << 28]uint32)(unsafe.Pointer(ledsArray))[:length:length] // #nosec
 	}
 	return nil
 }
@@ -216,23 +216,23 @@ func (ws2811 *WS2811) Fini() {
 
 // SetLed defines the color of a given pixel.
 func (ws2811 *WS2811) SetLed(channel int, index int, value uint32) {
-	ws2811.channels[channel][index] = value
+	ws2811.Channels[channel][index] = value
 }
 
 // SetBitmap defines the color of a all pixels.
 func (ws2811 *WS2811) SetBitmap(channel int, a []uint32) {
-	copy(ws2811.channels[channel], a)
+	copy(ws2811.Channels[channel], a)
 }
 
 // SetBitmapSlice defines the color of a slice of pixels.
 func (ws2811 *WS2811) SetBitmapSlice(channel int, offset int, a []uint32) {
-	copy(ws2811.channels[channel][offset:], a)
+	copy(ws2811.Channels[channel][offset:], a)
 }
 
 // Clear sets all pixels to black.
 func (ws2811 *WS2811) Clear(channel int) {
-	for i := 0; i < len(ws2811.channels[channel]); i++ {
-		ws2811.channels[channel][i] = 0
+	for i := 0; i < len(ws2811.Channels[channel]); i++ {
+		ws2811.Channels[channel][i] = 0
 	}
 }
 
