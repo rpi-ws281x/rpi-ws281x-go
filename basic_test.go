@@ -64,12 +64,14 @@ func TestSnake(t *testing.T) {
 			bitmap[i-1] = 0
 		}
 		bitmap[i] = pixelColor
-		ws.SetBitmap(0, bitmap)
+		copy(ws.Leds(0), bitmap)
 		ws.Render()
 		ws.Wait()
 	}
 
-	ws.Clear(0)
+	for i := 0; i < len(ws.Leds(0)); i++ {
+		ws.Leds(0)[i] = 0
+	}
 	ws.Render()
 	ws.Wait()
 	ws.Fini()
