@@ -43,9 +43,9 @@ const (
 	// DefaultGpioPin is the default pin on the Raspberry Pi where the signal will be available. Note
 	// that it is the BCM (Broadcom Pin Number) and the "Pin" 18 is actually the physical pin 12 of the
 	// Raspberry Pi.
-	DefaultGpioPin    = 18
+	DefaultGpioPin = 18
 	// DefaultLedCount is the default number of LEDs on the stripe.
-	DefaultLedCount   = 16
+	DefaultLedCount = 16
 	// DefaultBrightness is the default maximum brightness of the LEDs. The brightness value can be between 0 and 255.
 	// If the brightness is too low, the LEDs remain dark. If the brightness is too high, the system needs too much
 	// current.
@@ -137,7 +137,7 @@ var DefaultOptions = Option{
 	Frequency: TargetFreq,
 	DmaNum:    DefaultDmaNum,
 	Channels: []ChannelOption{
-		ChannelOption{
+		{
 			GpioPin:    DefaultGpioPin,
 			LedCount:   DefaultLedCount,
 			Brightness: DefaultBrightness,

@@ -19,10 +19,11 @@ import (
 )
 
 const (
-	brightness = 90
+	brightness = 128
 	width      = 8
 	height     = 8
-	ledCounts  = width * height)
+	ledCounts  = width * height
+)
 
 func checkError(err error) {
 	if err != nil {

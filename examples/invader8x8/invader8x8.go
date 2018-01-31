@@ -28,7 +28,7 @@ const (
 	width      = 8
 	height     = 8
 	ledCounts  = width * height
-	maxCount   = 20
+	maxCount   = 50
 	sleepTime  = 200
 )
 
@@ -70,7 +70,7 @@ func coordinatesToIndex(bounds image.Rectangle, x int, y int) int {
 	if x%2 == 0 {
 		return (x-bounds.Min.X)*height + (y - bounds.Min.Y)
 	} else {
-		return (x-bounds.Min.X)*height + (height-1) - (y - bounds.Min.Y)
+		return (x-bounds.Min.X)*height + (height - 1) - (y - bounds.Min.Y)
 	}
 }
 

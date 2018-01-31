@@ -21,9 +21,8 @@ import (
 
 const (
 	brightness = 90
-	ledCounts = 64
-	sleepTime  = 10
-
+	ledCounts  = 64
+	sleepTime  = 50
 )
 
 type wsEngine interface {
