@@ -69,9 +69,8 @@ func (inv *invader) setup(images ...string) error {
 func coordinatesToIndex(bounds image.Rectangle, x int, y int) int {
 	if x%2 == 0 {
 		return (x-bounds.Min.X)*height + (y - bounds.Min.Y)
-	} else {
-		return (x-bounds.Min.X)*height + (height - 1) - (y - bounds.Min.Y)
 	}
+	return (x-bounds.Min.X)*height + (height - 1) - (y - bounds.Min.Y)
 }
 
 func rgbToColor(r uint32, g uint32, b uint32) uint32 {
@@ -104,7 +103,7 @@ func main() {
 	inv := &invader{
 		ws: dev,
 	}
-	check(inv.setup(invader0_png, invader1_png))
+	check(inv.setup(invader0Png, invader1Png))
 	defer dev.Fini()
 
 	for count := 0; count < maxCount; count++ {
@@ -114,13 +113,13 @@ func main() {
 	}
 }
 
-const invader0_png = `
+const invader0Png = `
 iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAACXBIWXMAABLqAAAS6gEWyM/fAAAAB3RJ
 TUUH4gEfAAwq1Uz4igAAAExJREFUCNdtjLENwDAIBM9IP0T2yEBu2CsDuWEKNwyRwg1CpuGOFz8kAcCa
 G3i/56jVawWrUjNrDQfW3CM8uY4kSeHZgCo146z2EZ4/za8lhsTPr+cAAAAASUVORK5CYII=
 `
 
-const invader1_png = `
+const invader1Png = `
 iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMA
 ABLqAAAS6gEWyM/fAAAAB3RJTUUH4gEfCgAfIt32cwAAAFZJREFUCNdjZGVlZWBgYGBgOJPwnIGBwWSB
 JITLhCyKzGBC5iDLMUEovVnCEFEI40zCc8aLqW8YsAJWVlZWVtaLqW/QGAwQV0GEIKIQLgNcFFkHAwMD
