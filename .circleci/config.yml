@@ -31,7 +31,7 @@ jobs:
           name: Building librarie
           command: |
             sudo chown -R circleci:circleci /usr/local/go/pkg
-            go get -v ./...
+            go get -v .
             go build
           environment:
             GOOS: "linux"
@@ -42,14 +42,43 @@ jobs:
             CXX_FOR_TARGET: arm-linux-gnueabihf-g++
             CPATH: /usr/local/include
             LIBRARY_PATH: /usr/local/lib
+
       - run: 
-          name: Install linter
+          name: Installing linter
           command: |
             go get -u github.com/alecthomas/gometalinter
             gometalinter --install
+
       - run: 
-          name: lint
+          name: linting
           command: |
-            gometalinter ./...  
+            gometalinter .
+
+      - run:
+          name: Building examples
+          command: |
+            cd examples/hw; go build .
+            cd ../color_wipe; go build .
+            cd ../swiss; go build .
+            cd ../invader8x8; go build .
+            cd ../..
+          environment:
+            GOOS: "linux"
+            GOARCH: "arm"
+            CGO_ENABLED: "1"
+            CC: arm-linux-gnueabihf-gcc
+            CC_FOR_TARGET: arm-linux-gnueabihf-gcc
+            CXX_FOR_TARGET: arm-linux-gnueabihf-g++
+            CPATH: /usr/local/include
+            LIBRARY_PATH: /usr/local/lib
+
       - store_artifacts:
           path: /go/pkg/linux_arm/github.com/supcik/rpi_ws281x_go.a
+      - store_artifacts:
+          path: examples/hw/hw
+      - store_artifacts:
+          path: examples/color_wipe/color_wipe
+      - store_artifacts:
+          path: examples/swiss/swiss
+      - store_artifacts:
+          path: examples/invader8x8/invader8x8

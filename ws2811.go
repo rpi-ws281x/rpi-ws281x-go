@@ -21,7 +21,10 @@ package ws2811
 
 // #cgo CFLAGS: -std=c99
 // #cgo LDFLAGS: -lws2811
-// #include "ws2811.go.h"
+// #include <stdint.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <ws2811.h>
 import "C"
 
 import (
@@ -33,10 +36,29 @@ import (
 const (
 	// DefaultDmaNum is the default DMA number. Usually, this is 5 ob the Raspberry Pi
 	DefaultDmaNum = 5
-	// RpiPwmChannels is the number of PWM channels in the Raspberry Pi
+	// RpiPwmChannels is the number of PWM leds in the Raspberry Pi
 	RpiPwmChannels = 2
 	// TargetFreq is the target frequency. It is usually 800kHz (800000), and an go as low as 400000
 	TargetFreq = 800000
+	// DefaultGpioPin is the default pin on the Raspberry Pi where the signal will be available. Note
+	// that it is the BCM (Broadcom Pin Number) and the "Pin" 18 is actually the physical pin 12 of the
+	// Raspberry Pi.
+	DefaultGpioPin    = 18
+	// DefaultLedCount is the default number of LEDs on the stripe.
+	DefaultLedCount   = 16
+	// DefaultBrightness is the default maximum brightness of the LEDs. The brightness value can be between 0 and 255.
+	// If the brightness is too low, the LEDs remain dark. If the brightness is too high, the system needs too much
+	// current.
+	DefaultBrightness = 64 // Safe value between 0 and 255.
+)
+
+const (
+	// HwVerTypeUnknown represents unknown hardware
+	HwVerTypeUnknown = 0
+	// HwVerTypePi1 represents the Raspberry Pi 1
+	HwVerTypePi1 = 1
+	// HwVerTypePi2 represents the Raspberry Pi 2
+	HwVerTypePi2 = 2
 )
 
 // StateDesc is a map from a return state to its string description.
@@ -56,6 +78,15 @@ var StateDesc = map[int]string{
 	-12: "Unable to initialize PCM",
 	-13: "Unable to initialize SPI",
 	-14: "SPI transfer error",
+}
+
+// HwDesc is the Hardware Description
+type HwDesc struct {
+	Type          uint32
+	Version       uint32
+	PeriphBase    uint32
+	VideocoreBase uint32
+	Desc          string
 }
 
 // ChannelOption is the list of channel options
@@ -90,7 +121,7 @@ type Option struct {
 	Frequency int
 	// DmaNum is the number of a DMA _not_ already in use
 	DmaNum int
-	// Channles are channels options
+	// Channels are channel options
 	Channels []ChannelOption
 }
 
@@ -98,23 +129,35 @@ type Option struct {
 type WS2811 struct {
 	dev         *C.ws2811_t
 	initialized bool
-	Channels    [][]uint32
+	leds        [][]uint32
 }
 
 // DefaultOptions defines sensible default options for MakeWS2811
 var DefaultOptions = Option{
-	Frequency: 800000,
-	DmaNum:    5,
+	Frequency: TargetFreq,
+	DmaNum:    DefaultDmaNum,
 	Channels: []ChannelOption{
 		ChannelOption{
-			GpioPin:    18,
-			LedCount:   16,
-			Brightness: 64,
+			GpioPin:    DefaultGpioPin,
+			LedCount:   DefaultLedCount,
+			Brightness: DefaultBrightness,
 			StripeType: WS2812Strip,
 			Invert:     false,
 			Gamma:      gamma8,
 		},
 	},
+}
+
+// HwDetect gives information about the hardware
+func HwDetect() HwDesc {
+	hw := unsafe.Pointer(C.rpi_hw_detect()) // nolint: gas
+	return HwDesc{
+		Type:          uint32((*C.rpi_hw_t)(hw)._type),
+		Version:       uint32((*C.rpi_hw_t)(hw).hwver),
+		PeriphBase:    uint32((*C.rpi_hw_t)(hw).periph_base),
+		VideocoreBase: uint32((*C.rpi_hw_t)(hw).videocore_base),
+		Desc:          C.GoString((*C.rpi_hw_t)(hw).desc),
+	}
 }
 
 // MakeWS2811 create an instance of WS2811.
@@ -123,18 +166,17 @@ func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
 		initialized: false,
 	}
 	if ws2811 == nil {
-		err = errors.New("Unable to allocate memory")
+		err = errors.New("unable to allocate memory")
 		return nil, err
 	}
 	// Allocate and reset structure
 	ws2811.dev = (*C.ws2811_t)(C.malloc(C.sizeof_ws2811_t))
-	C.memset(unsafe.Pointer(ws2811.dev), 0, C.sizeof_ws2811_t) // #nosec
+	C.memset(unsafe.Pointer(ws2811.dev), 0, C.sizeof_ws2811_t) // nolint: gas
 
 	ws2811.dev.freq = C.uint32_t(opt.Frequency)
 	ws2811.dev.dmanum = C.int(opt.DmaNum)
 
-	for i, cOpt := range opt.Channels {
-		_ = i // prevent gotype error
+	for i, cOpt := range opt.Channels { // nolint: gotype
 		ws2811.dev.channel[i].gpionum = C.int(cOpt.GpioPin)
 		ws2811.dev.channel[i].count = C.int(cOpt.LedCount)
 		ws2811.dev.channel[i].brightness = C.uint8_t(cOpt.Brightness)
@@ -153,7 +195,7 @@ func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
 			// allocate and copy gamma table. The memory will be freed by C.ws2811_fini().
 			m := (*C.uint8_t)(C.malloc(C.size_t(256)))
 			ws2811.dev.channel[i].gamma = m
-			C.memcpy(unsafe.Pointer(m), unsafe.Pointer(&cOpt.Gamma[0]), C.size_t(256)) // #nosec
+			C.memcpy(unsafe.Pointer(m), unsafe.Pointer(&cOpt.Gamma[0]), C.size_t(256)) // nolint: gas
 		}
 	}
 	return ws2811, err
@@ -162,22 +204,23 @@ func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
 // Init initialize the device. It should be called only once before any other method.
 func (ws2811 *WS2811) Init() error {
 	if ws2811.initialized {
-		return errors.New("Already initialized")
+		return errors.New("device already initialized")
 	}
 	res := int(C.ws2811_init(ws2811.dev))
 	if res != 0 {
-		return fmt.Errorf("Error ws2811.init: %d (%v)", res, StatusDesc(res))
+		return fmt.Errorf("error ws2811.init: %d (%v)", res, StatusDesc(res))
 	}
 	ws2811.initialized = true
-	ws2811.Channels = make([][]uint32, RpiPwmChannels)
+	ws2811.leds = make([][]uint32, RpiPwmChannels)
 	for i := 0; i < RpiPwmChannels; i++ {
-		var ledsArray *C.ws2811_led_t = C.ws2811_leds(ws2811.dev, C.int(i))
-		length := int(C.ws2811_leds_count(ws2811.dev, C.int(i)))
+		// var ledsArray *C.ws2811_led_t = C.ws2811_leds(ws2811.dev, C.int(i))
+		ledsArray := ws2811.dev.channel[i].leds    // nolint: gotype
+		length := int(ws2811.dev.channel[i].count) // nolint: gotype
 		// convert the led C array into a golang slice:
 		// https://github.com/golang/go/wiki/cgo#turning-c-arrays-into-go-slices
 		// 1 << 28 is the largest pseudo-size that we can use. If we try a larger number,
 		// then we get a compile error: "type [N]uint32 too large".
-		ws2811.Channels[i] = (*[1 << 28]uint32)(unsafe.Pointer(ledsArray))[:length:length] // #nosec
+		ws2811.leds[i] = (*[1 << 28]uint32)(unsafe.Pointer(ledsArray))[:length:length] // nolint: gas
 	}
 	return nil
 }
@@ -186,7 +229,7 @@ func (ws2811 *WS2811) Init() error {
 func (ws2811 *WS2811) Render() error {
 	res := int(C.ws2811_render(ws2811.dev))
 	if res != 0 {
-		return fmt.Errorf("Error ws2811.render: %d (%v)", res, StatusDesc(res))
+		return fmt.Errorf("error ws2811.render: %d (%v)", res, StatusDesc(res))
 	}
 	return nil
 }
@@ -198,7 +241,7 @@ func (ws2811 *WS2811) Render() error {
 func (ws2811 *WS2811) Wait() error {
 	res := int(C.ws2811_wait(ws2811.dev))
 	if res != 0 {
-		return fmt.Errorf("Error ws2811.wait: %d (%v)", res, StatusDesc(res))
+		return fmt.Errorf("error ws2811.wait: %d (%v)", res, StatusDesc(res))
 
 	}
 	return nil
@@ -210,30 +253,13 @@ func (ws2811 *WS2811) Fini() {
 	// release the memory allocated by MakeWS2811. Note that we should not release
 	// ws2811.dev.channel[i].gamma (also allocated by MakeWS2811) because C.ws2811_fini
 	// already releases this data.
-	C.free(unsafe.Pointer(ws2811.dev)) // #nosec
+	C.free(unsafe.Pointer(ws2811.dev)) // nolint: gas
 	ws2811.initialized = false
 }
 
-// SetLed defines the color of a given pixel.
-func (ws2811 *WS2811) SetLed(channel int, index int, value uint32) {
-	ws2811.Channels[channel][index] = value
-}
-
-// SetBitmap defines the color of a all pixels.
-func (ws2811 *WS2811) SetBitmap(channel int, a []uint32) {
-	copy(ws2811.Channels[channel], a)
-}
-
-// SetBitmapSlice defines the color of a slice of pixels.
-func (ws2811 *WS2811) SetBitmapSlice(channel int, offset int, a []uint32) {
-	copy(ws2811.Channels[channel][offset:], a)
-}
-
-// Clear sets all pixels to black.
-func (ws2811 *WS2811) Clear(channel int) {
-	for i := 0; i < len(ws2811.Channels[channel]); i++ {
-		ws2811.Channels[channel][i] = 0
-	}
+// Leds returns the LEDs array of a given channel
+func (ws2811 *WS2811) Leds(channel int) []uint32 {
+	return ws2811.leds[channel]
 }
 
 // StatusDesc returns the description of a status code
@@ -242,5 +268,5 @@ func StatusDesc(code int) string {
 	if ok {
 		return desc
 	}
-	return "unknown"
+	return "Unknown"
 }

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// This file contains the constants for all ws281x stripe types.
+
 package ws2811
 
 // 4 color R, G, B and W ordering

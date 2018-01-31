@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This header file is a wrapper for the rpi_ws281x library:
-// https://github.com/jgarff/rpi_ws281x
- 
+package main
 
-#pragma once
-#ifndef WS2811_GO_H_
-#define WS2811_GO_H_
+import (
+	"fmt"
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ws2811.h>
+	ws2811 "github.com/supcik/rpi_ws281x_go"
+)
 
-// ws2811_leds returns a reference (address) of the LEDs array of a channel.
-extern ws2811_led_t* ws2811_leds(const ws2811_t* ws2811, int chan);
-
-// ws2811_leds returns a reference (address) of the LEDs array of a channel.
-extern int ws2811_leds_count(const ws2811_t* ws2811, int chan);
-
-#endif // WS2811_GO_H_
+func main() {
+	fmt.Println("*****************************")
+	fmt.Println("* rpi_ws281x Hardware Check *")
+	fmt.Println("*****************************")
+	hw := ws2811.HwDetect()
+	fmt.Printf("Hardware Type    : %d\n", hw.Type)
+	fmt.Printf("Hardware Version : 0x%08X\n", hw.Version)
+	fmt.Printf("Periph base      : 0x%08X\n", hw.PeriphBase)
+	fmt.Printf("Video core base  : 0x%08X\n", hw.VideocoreBase)
+	fmt.Printf("Description      : %v\n", hw.Desc)
+}
