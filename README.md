@@ -14,11 +14,13 @@ Go (golang) binding for the rpi_ws281x userspace Raspberry Pi library for contro
 This library is tested using the following hardware setup:
 
 <p align="center">
-  <img src="https://i.imgur.com/jodJKUp.png" width="256" title="Hardware setup">
+  <img src="https://i.imgur.com/jodJKUp.png" width="600" title="Hardware setup">
 </p>
 
 In this circuit, the 4050 is a driver that convert the 3.3V of the Raspberry Pi to the 5V needed by the ws2811 chip. The led matrix is connected by an external power supply that provides the required current.
 
 Here is the the result of the "Swiss" example:
 
-![Swiss Demo](https://i.imgur.com/pgdvBY0.jpg)
+<p align="center">
+  <img src="https://i.imgur.com/pgdvBY0.jpg" width="600" title="Swiss Example">
+</p>
