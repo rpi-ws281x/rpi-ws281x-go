@@ -16,11 +16,12 @@ package main
 
 import (
 	"encoding/base64"
-	ws2811 "github.com/supcik/rpi_ws281x_go"
 	"image"
 	_ "image/png"
 	"strings"
 	"time"
+
+	ws2811 "github.com/rpi-ws281x/rpi-ws281x-go"
 )
 
 const (

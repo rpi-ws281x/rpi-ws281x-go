@@ -5,7 +5,7 @@ jobs:
     docker:
       - image: circleci/golang:1.10
       
-    working_directory: /go/src/github.com/supcik/rpi_ws281x_go
+    working_directory: /go/src/github.com/rpi-ws281x/rpi-ws281x-go
     steps:
       - run:
           name: Building and installing C librairie
@@ -73,7 +73,7 @@ jobs:
             LIBRARY_PATH: /usr/local/lib
 
       - store_artifacts:
-          path: /go/pkg/linux_arm/github.com/supcik/rpi_ws281x_go.a
+          path: /go/pkg/linux_arm/github.com/rpi-ws281x/rpi-ws281x-go.a
       - store_artifacts:
           path: examples/hw/hw
       - store_artifacts:

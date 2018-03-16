@@ -1,9 +1,9 @@
-[![GoDoc](https://godoc.org/github.com/supcik/rpi_ws281x_go?status.svg)](http://godoc.org/github.com/supcik/rpi_ws281x_go)
-[![Go Report Card](https://goreportcard.com/badge/github.com/supcik/rpi_ws281x_go)](https://goreportcard.com/report/github.com/supcik/rpi_ws281x_go)
-[![CircleCI](https://circleci.com/gh/supcik/rpi_ws281x_go.svg?style=shield)](https://circleci.com/gh/supcik/rpi_ws281x_go)
-[![license](https://img.shields.io/github/license/supcik/rpi_ws281x_go.svg)](https://github.com/supcik/rpi_ws281x_go)
+[![GoDoc](https://godoc.org/github.com/rpi-ws281x/rpi-ws281x-go?status.svg)](http://godoc.org/github.com/rpi-ws281x/rpi-ws281x-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rpi-ws281x/rpi-ws281x-go)](https://goreportcard.com/report/github.com/rpi-ws281x/rpi-ws281x-go)
+[![CircleCI](https://circleci.com/gh/rpi-ws281x/rpi-ws281x-go.svg?style=shield)](https://circleci.com/gh/rpi-ws281x/rpi-ws281x-go)
+[![license](https://img.shields.io/github/license/rpi-ws281x/rpi-ws281x-go.svg)](https://github.com/rpi-ws281x/rpi-ws281x-go)
 
-# rpi_ws281x_go
+# rpi-ws281x-go
 
 ## Summary
 

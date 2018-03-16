@@ -17,7 +17,7 @@ package main
 import (
 	"fmt"
 
-	ws2811 "github.com/supcik/rpi_ws281x_go"
+	ws2811 "github.com/rpi-ws281x/rpi-ws281x-go"
 )
 
 func main() {
