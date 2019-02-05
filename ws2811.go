@@ -22,8 +22,8 @@ package ws2811
 import "github.com/pkg/errors"
 
 const (
-	// DefaultDmaNum is the default DMA number. Usually, this is 5 ob the Raspberry Pi
-	DefaultDmaNum = 5
+	// DefaultDmaNum is the default DMA number.
+	DefaultDmaNum = 10
 	// RpiPwmChannels is the number of PWM leds in the Raspberry Pi
 	RpiPwmChannels = 2
 	// TargetFreq is the target frequency. It is usually 800kHz (800000), and an go as low as 400000
