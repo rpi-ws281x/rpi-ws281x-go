@@ -110,6 +110,9 @@ func (ws2811 *WS2811) Init() error {
 		// var ledsArray *C.ws2811_led_t = C.ws2811_leds(ws2811.dev, C.int(i))
 		ledsArray := ws2811.dev.channel[i].leds    // nolint: gotype
 		length := int(ws2811.dev.channel[i].count) // nolint: gotype
+		if length <= 0 {
+			continue // spi_init does not initialize channel[1]
+		}
 		// convert the led C array into a golang slice:
 		// https://github.com/golang/go/wiki/cgo#turning-c-arrays-into-go-slices
 		// 1 << 28 is the largest pseudo-size that we can use. If we try a larger number,
