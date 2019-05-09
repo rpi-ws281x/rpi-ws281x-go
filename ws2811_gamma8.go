@@ -14,6 +14,7 @@
 
 package ws2811
 
+//nolint: gochecknoglobals
 var gamma8 = []byte{
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,

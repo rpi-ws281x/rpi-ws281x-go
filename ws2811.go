@@ -50,6 +50,7 @@ const (
 )
 
 // StateDesc is a map from a return state to its string description.
+//nolint: gochecknoglobals
 var StateDesc = map[int]string{
 	0:   "Success",
 	-1:  "Generic failure",
@@ -114,6 +115,7 @@ type Option struct {
 }
 
 // DefaultOptions defines sensible default options for MakeWS2811
+//nolint: gochecknoglobals
 var DefaultOptions = Option{
 	Frequency: TargetFreq,
 	DmaNum:    DefaultDmaNum,

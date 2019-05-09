@@ -44,16 +44,12 @@ func HwDetect() HwDesc {
 }
 
 // MakeWS2811 create an instance of WS2811.
-func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
-	ws2811 = &WS2811{
+func MakeWS2811(opt *Option) (*WS2811, error) {
+	ws2811 := &WS2811{
 		initialized: false,
 		opt:         opt,
 	}
-	if ws2811 == nil {
-		err = errors.New("unable to allocate memory")
-		return nil, err
-	}
-	return ws2811, err
+	return ws2811, nil
 }
 
 // Init initialize the device. It should be called only once before any other method.
