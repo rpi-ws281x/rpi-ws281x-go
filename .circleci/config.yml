@@ -46,13 +46,12 @@ jobs:
       - run: 
           name: Installing linter
           command: |
-            go get -u github.com/alecthomas/gometalinter
-            gometalinter --install
+            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
 
       - run: 
           name: linting
           command: |
-            gometalinter .
+            golangci-lint run --enable-all .
 
       - run:
           name: Building examples
