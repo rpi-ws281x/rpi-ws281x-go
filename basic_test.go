@@ -20,18 +20,21 @@ import (
 	"os/user"
 	"runtime"
 	"testing"
-)
 
-var gpioPin = flag.Int("gpio-pin", 18, "GPIO pin")
-var width = flag.Int("width", 32, "LED matrix width")
-var height = flag.Int("height", 8, "LED matrix height")
-var brightness = flag.Int("brightness", 64, "Brightness (0-255)")
+	"github.com/stretchr/testify/assert"
+)
 
 const (
 	pixelColor = 255 << 16 // red
 )
 
 func TestSnake(t *testing.T) {
+	var gpioPin = flag.Int("gpio-pin", 18, "GPIO pin")
+	var width = flag.Int("width", 32, "LED matrix width")
+	var height = flag.Int("height", 8, "LED matrix height")
+	var brightness = flag.Int("brightness", 64, "Brightness (0-255)")
+	flag.Parse()
+
 	user, err := user.Current()
 	if err != nil {
 		t.Fatal(err)
@@ -65,18 +68,14 @@ func TestSnake(t *testing.T) {
 		}
 		bitmap[i] = pixelColor
 		copy(ws.Leds(0), bitmap)
-		ws.Render()
-		ws.Wait()
+		assert.Nil(t, ws.Render())
+		assert.Nil(t, ws.Wait())
 	}
 
 	for i := 0; i < len(ws.Leds(0)); i++ {
 		ws.Leds(0)[i] = 0
 	}
-	ws.Render()
-	ws.Wait()
+	assert.Nil(t, ws.Render())
+	assert.Nil(t, ws.Wait())
 	ws.Fini()
-}
-
-func init() {
-	flag.Parse()
 }
