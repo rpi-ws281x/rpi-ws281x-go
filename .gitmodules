@@ -1,3 +1,0 @@
-[submodule "vendor/rpi_ws281x"]
-	path = vendor/rpi_ws281x
-	url = https://github.com/jgarff/rpi_ws281x
