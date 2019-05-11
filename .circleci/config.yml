@@ -1,10 +1,20 @@
-version: 2
+version: 2.1
 
 jobs:
+  lint:
+    docker:
+      - image: circleci/golang:latest
+      - run: 
+          name: Installing linter
+          command: |
+            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
+      - run: 
+          name: linting
+          command: |
+            golangci-lint run --enable-all .
   build:
     docker:
       - image: circleci/golang:latest
-      
     working_directory: /go/src/github.com/rpi-ws281x/rpi-ws281x-go
     steps:
       - run:
@@ -26,9 +36,8 @@ jobs:
             sudo mkdir -p /usr/local/include
             sudo cp *.h /usr/local/include
       - checkout
-
       - run:
-          name: Building librarie
+          name: Building module
           command: |
             sudo chown -R circleci:circleci /usr/local/go/pkg
             go get -v .
@@ -36,23 +45,13 @@ jobs:
           environment:
             GOOS: "linux"
             GOARCH: "arm"
+            GOARM: "7"
             CGO_ENABLED: "1"
             CC: arm-linux-gnueabihf-gcc
             CC_FOR_TARGET: arm-linux-gnueabihf-gcc
             CXX_FOR_TARGET: arm-linux-gnueabihf-g++
             CPATH: /usr/local/include
             LIBRARY_PATH: /usr/local/lib
-
-      - run: 
-          name: Installing linter
-          command: |
-            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
-
-      - run: 
-          name: linting
-          command: |
-            golangci-lint run --enable-all .
-
       - run:
           name: Building examples
           command: |
@@ -64,13 +63,13 @@ jobs:
           environment:
             GOOS: "linux"
             GOARCH: "arm"
+            GOARM: "7"
             CGO_ENABLED: "1"
             CC: arm-linux-gnueabihf-gcc
             CC_FOR_TARGET: arm-linux-gnueabihf-gcc
             CXX_FOR_TARGET: arm-linux-gnueabihf-g++
             CPATH: /usr/local/include
             LIBRARY_PATH: /usr/local/lib
-
       - store_artifacts:
           path: /go/pkg/linux_arm/github.com/rpi-ws281x/rpi-ws281x-go.a
       - store_artifacts:
@@ -81,3 +80,16 @@ jobs:
           path: examples/swiss/swiss
       - store_artifacts:
           path: examples/invader8x8/invader8x8
+
+workflows:
+  version: 2
+  lint_and_build:
+    jobs:
+      - lint
+      - build
+  daily:
+    triggers:
+      - schedule:
+          cron: "55 8 * * *"
+    jobs:
+      - build
