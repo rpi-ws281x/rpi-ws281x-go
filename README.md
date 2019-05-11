@@ -19,7 +19,7 @@ This module is a wrapper around the [rpi_ws281x](https://github.com/jgarff/rpi_w
 the pi_ws281x C library according to the [documentation](https://github.com/jgarff/rpi_ws281x#build),
 copy the `*.a` files to `/usr/local/bin` and the `*.h` files to `/usr/local/include`.
 
-Then you can compile the go code as usually.
+Then you can compile the go code as usual.
 
 ### Cross compiling
 
@@ -90,9 +90,9 @@ This library is tested using the following hardware setup:
   <img src="https://i.imgur.com/jodJKUp.png" width="600" title="Hardware setup">
 </p>
 
-In this circuit, the 4050 is a driver that convert the 3.3V of the Raspberry Pi to the 5V needed by the ws2811 chip. The led matrix is connected by an external power supply that provides the required current.
+In this circuit, the 4050 is a driver that converts the 3.3V of the Raspberry Pi to the 5V needed by the ws2811 chip. The LED matrix is connected by an external power supply that provides the required current.
 
-Here is the the result of the "Swiss" example:
+Here is the result of the "Swiss" example:
 
 <p align="center">
   <img src="https://i.imgur.com/pgdvBY0.jpg" width="600" title="Swiss Example">
