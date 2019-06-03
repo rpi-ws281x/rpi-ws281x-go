@@ -5,9 +5,7 @@
 
 # rpi-ws281x-go
 
-## Summary
-
-Go (golang) binding for the rpi_ws281x userspace Raspberry Pi library for controlling WS281X LEDs by Jeremy Garff ([https://github.com/jgarff/rpi_ws281x](https://github.com/jgarff/rpi_ws281x)). The goal for this library is to offer all the features of the C library and to make is as efficiently as possible.
+> Go (golang) binding for the rpi_ws281x userspace Raspberry Pi library for controlling WS281X LEDs by Jeremy Garff ([https://github.com/jgarff/rpi_ws281x](https://github.com/jgarff/rpi_ws281x)). The goal for this library is to offer all the features of the C library and to make is as efficiently as possible.
 
 ## Installing
 
@@ -50,9 +48,9 @@ RUN go get -v -u github.com/rpi-ws281x/rpi-ws281x-go
 RUN [ "cross-build-end" ]
 ```
 
-You might want to change the base image if you are not using the Raspberry Pi 3.
+You might want to change the base image if you are not using the Raspberry Pi 3. E.g. `balenalib/raspberry-pi2-golang:latest-build` or `balenalib/raspberry-pi-golang:latest-build`.
 
-Now build the image with the command :
+Now build the image with the command:
 
 ```
 docker build --tag rpi-ws281x-go-builder .
