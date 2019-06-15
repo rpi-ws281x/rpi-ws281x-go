@@ -6,7 +6,7 @@ jobs:
       - image: circleci/golang:latest
     working_directory: /go/src/github.com/rpi-ws281x/rpi-ws281x-go
     environment:
-      GO111MODULE: on 
+      GO111MODULE: "on"
     steps:
       - run:
           name: Building and installing C librairie
