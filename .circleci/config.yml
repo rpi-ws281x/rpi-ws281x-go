@@ -12,8 +12,6 @@ jobs:
           name: Building and installing C librairie
           command: |
             sudo apt-get install build-essential git scons curl
-            echo "deb http://emdebian.org/tools/debian/ jessie main" | sudo tee /etc/apt/sources.list.d/crosstools.list
-            curl http://emdebian.org/tools/debian/emdebian-toolchain-archive.key | sudo apt-key add -
             sudo dpkg --add-architecture armhf
             sudo apt-get update
             sudo apt-get install crossbuild-essential-armhf
