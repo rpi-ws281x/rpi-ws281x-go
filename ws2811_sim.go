@@ -71,6 +71,9 @@ func (ws2811 *WS2811) Init() error {
 	return nil
 }
 
+// SetBrightness changes the brightness of a given channel. Value between 0 and 255
+func (ws2811 *WS2811) SetBrightness(channel int, brightness int) {}
+
 // Render sends a complete frame to the LED Matrix
 func (ws2811 *WS2811) Render() error {
 	return nil
