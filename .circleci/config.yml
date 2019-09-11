@@ -45,7 +45,6 @@ jobs:
           name: Installing linter
           command: |
             GO111MODULE=off go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
-
       - run: 
           name: linting
           command: |

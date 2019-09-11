@@ -1,4 +1,4 @@
-// Copyright 2018 Jacques Supcik / HEIA-FR
+// Copyright 2019 Jacques Supcik / HEIA-FR
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ func (ws2811 *WS2811) Init() error {
 			ledCount = 0
 		}
 		ws2811.leds[i] = make([]uint32, ledCount)
-
 	}
 	return nil
 }
