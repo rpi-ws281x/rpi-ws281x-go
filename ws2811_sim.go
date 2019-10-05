@@ -49,6 +49,7 @@ func MakeWS2811(opt *Option) (*WS2811, error) {
 		initialized: false,
 		opt:         opt,
 	}
+
 	return ws2811, nil
 }
 
@@ -57,7 +58,9 @@ func (ws2811 *WS2811) Init() error {
 	if ws2811.initialized {
 		return errors.New("device already initialized")
 	}
+
 	ws2811.leds = make([][]uint32, RpiPwmChannels)
+
 	for i := 0; i < RpiPwmChannels; i++ {
 		var ledCount int
 		if i < len(ws2811.opt.Channels) {
@@ -65,8 +68,10 @@ func (ws2811 *WS2811) Init() error {
 		} else {
 			ledCount = 0
 		}
+
 		ws2811.leds[i] = make([]uint32, ledCount)
 	}
+
 	return nil
 }
 

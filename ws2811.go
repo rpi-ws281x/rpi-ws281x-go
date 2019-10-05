@@ -141,13 +141,17 @@ func (ws2811 *WS2811) SetLedsSync(channel int, leds []uint32) error {
 	if err := ws2811.Wait(); err != nil {
 		return errors.WithMessage(err, "Error setting LEDs")
 	}
+
 	l := len(leds)
+
 	if l > len(ws2811.leds[channel]) {
 		return errors.New("Error: Too many LEDs")
 	}
+
 	for i := 0; i < l; i++ {
 		ws2811.leds[channel][i] = leds[i]
 	}
+
 	return nil
 }
 
@@ -157,5 +161,6 @@ func StatusDesc(code int) string {
 	if ok {
 		return desc
 	}
+
 	return "Unknown"
 }

@@ -29,16 +29,18 @@ const (
 )
 
 func TestSnake(t *testing.T) {
-	var gpioPin = flag.Int("gpio-pin", 18, "GPIO pin")
-	var width = flag.Int("width", 32, "LED matrix width")
-	var height = flag.Int("height", 8, "LED matrix height")
-	var brightness = flag.Int("brightness", 64, "Brightness (0-255)")
+	gpioPin := flag.Int("gpio-pin", 18, "GPIO pin")
+	width := flag.Int("width", 32, "LED matrix width")
+	height := flag.Int("height", 8, "LED matrix height")
+	brightness := flag.Int("brightness", 64, "Brightness (0-255)")
+
 	flag.Parse()
 
 	user, err := user.Current()
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if runtime.GOARCH == "arm" && user.Uid != "0" {
 		fmt.Println("This test requires root privilege")
 		fmt.Println("Please try \"sudo go test -v\"")
@@ -62,10 +64,12 @@ func TestSnake(t *testing.T) {
 	}
 
 	bitmap := make([]uint32, size)
+
 	for i := 0; i < size; i++ {
 		if i > 0 {
 			bitmap[i-1] = 0
 		}
+
 		bitmap[i] = pixelColor
 		copy(ws.Leds(0), bitmap)
 		assert.Nil(t, ws.Render())
