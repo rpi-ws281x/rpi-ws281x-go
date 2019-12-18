@@ -43,7 +43,7 @@ func main() {
 	defer dev.Fini()
 
 	for x := 0; x < width; x++ {
-		for y := 0; y < width; y++ {
+		for y := 0; y < height; y++ {
 			color := uint32(0xff0000)
 			if x > 2 && x < 5 && y > 0 && y < 7 {
 				color = 0xffffff
