@@ -15,7 +15,7 @@ jobs:
     - name: Run GolangCI-Lint 
       run: |
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.23.3
-        golangci-lint run ./...
+        golangci-lint run --enable-all ./...
     - name: Set up Docker Buildx
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1
@@ -27,5 +27,14 @@ jobs:
       run: |
         docker buildx build \
           --platform linux/arm/v7 \
-          --output "type=image,push=false" \
+          --tag rpi-ws281x-builder \
+          --load \
           --file Dockerfile .
+    - name: Build examples
+      run: |    
+          docker run --rm -ti -v "$(pwd)"/examples/swiss:/go/src/swiss rpi-ws281x-builder go build -o src/swiss/swiss -v swiss
+    - name: Upload examples
+      uses: actions/upload-artifact@v1
+      with:
+        name: swiss
+        path: src/swiss/swiss
