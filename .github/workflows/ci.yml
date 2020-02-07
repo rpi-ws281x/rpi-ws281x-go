@@ -37,4 +37,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: swiss
-        path: src/swiss/swiss
+        path: examples/swiss/swiss
