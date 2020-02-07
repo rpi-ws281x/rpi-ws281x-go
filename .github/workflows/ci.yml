@@ -1,0 +1,70 @@
+name: CI
+on: [push]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: '1.13' 
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Run GolangCI-Lint 
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.23.3
+        ./bin/golangci-lint run --enable-all ./...
+
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
+    - name: Run Buildx
+      run: |
+        docker buildx build \
+          --platform linux/arm/v7 \
+          --tag rpi-ws281x-builder \
+          --load \
+          --file Dockerfile .
+
+    - name: Build Swiss examples
+      run: |
+        docker run --rm -v "$(pwd)"/examples/swiss:/go/src/swiss rpi-ws281x-builder go build -o src/swiss/swiss -v swiss
+    - name: Upload swiss binary
+      uses: actions/upload-artifact@v1
+      with:
+        name: swiss
+        path: examples/swiss/swiss
+
+    - name: Build color_wipe examples
+      run: |
+        docker run --rm -v "$(pwd)"/examples/color_wipe:/go/src/color_wipe rpi-ws281x-builder go build -o src/color_wipe/color_wipe -v color_wipe
+    - name: Upload color_wipe binary
+      uses: actions/upload-artifact@v1
+      with:
+        name: color_wipe
+        path: examples/color_wipe/color_wipe
+
+    - name: Build hw examples
+      run: |
+        docker run --rm -v "$(pwd)"/examples/hw:/go/src/hw rpi-ws281x-builder go build -o src/hw/hw -v hw
+        docker run --rm -v "$(pwd)"/examples/invader8x8:/go/src/invader8x8 rpi-ws281x-builder go build -o src/invader8x8/invader8x8 -v invader8x8
+    - name: Upload hw binary
+      uses: actions/upload-artifact@v1
+      with:
+        name: hw
+        path: examples/hw/hw
+
+    - name: Build invader8x8 examples
+      run: |
+        docker run --rm -v "$(pwd)"/examples/invader8x8:/go/src/invader8x8 rpi-ws281x-builder go build -o src/invader8x8/invader8x8 -v invader8x8
+    - name: Upload invader8x8 binary
+      uses: actions/upload-artifact@v1
+      with:
+        name: invader8x8
+        path: examples/invader8x8/invader8x8
