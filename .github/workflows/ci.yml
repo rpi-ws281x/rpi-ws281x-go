@@ -57,7 +57,7 @@ jobs:
     - name: Upload hw binary
       uses: actions/upload-artifact@v1
       with:
-        name: color_wipe
+        name: hw
         path: examples/hw/hw
 
     - name: Build invader8x8 examples
@@ -66,5 +66,5 @@ jobs:
     - name: Upload invader8x8 binary
       uses: actions/upload-artifact@v1
       with:
-        name: color_wipe
+        name: invader8x8
         path: examples/invader8x8/invader8x8
