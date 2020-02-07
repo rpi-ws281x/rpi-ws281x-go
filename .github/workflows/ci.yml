@@ -15,7 +15,7 @@ jobs:
     - name: Run GolangCI-Lint 
       run: |
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.23.3
-        golangci-lint run --enable-all ./...
+        ./bin/golangci-lint run --enable-all ./...
     - name: Set up Docker Buildx
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1
