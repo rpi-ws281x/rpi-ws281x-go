@@ -32,7 +32,7 @@ jobs:
           --file Dockerfile .
     - name: Build examples
       run: |    
-          docker run --rm -ti -v "$(pwd)"/examples/swiss:/go/src/swiss rpi-ws281x-builder go build -o src/swiss/swiss -v swiss
+          docker run --rm -v "$(pwd)"/examples/swiss:/go/src/swiss rpi-ws281x-builder go build -o src/swiss/swiss -v swiss
     - name: Upload examples
       uses: actions/upload-artifact@v1
       with:
