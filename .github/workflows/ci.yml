@@ -12,8 +12,10 @@ jobs:
         go-version: '1.13' 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-    - name: Run GolangCI-Lint Action by building from repository
-      uses: matoous/golangci-lint-action@v1.1.0
+    - name: Run GolangCI-Lint 
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.23.3
+        golangci-lint run ./...
     - name: Set up Docker Buildx
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1
