@@ -17,7 +17,7 @@ This module is a wrapper around the [rpi_ws281x](https://github.com/jgarff/rpi_w
 
 **This is not the recommended way**, but if you want to compile everything on the Raspbery Pi itself, start by building
 the pi_ws281x C library according to the [documentation](https://github.com/jgarff/rpi_ws281x#build),
-copy the `*.a` files to `/usr/local/bin` and the `*.h` files to `/usr/local/include`.
+copy the `*.a` files to `/usr/local/lib` and the `*.h` files to `/usr/local/include`.
 
 Then you can compile the go code as usual.
 
