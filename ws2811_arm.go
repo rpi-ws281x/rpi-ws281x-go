@@ -22,11 +22,11 @@
 package ws2811
 
 // #cgo CFLAGS: -std=c99
-// #cgo LDFLAGS: -lws2811
+// #cgo LDFLAGS: -lws2811 -lm
 // #include <stdint.h>
 // #include <stdlib.h>
 // #include <string.h>
-// #include <ws2811.h>
+// #include <ws2811/ws2811.h>
 import "C"
 
 import (
