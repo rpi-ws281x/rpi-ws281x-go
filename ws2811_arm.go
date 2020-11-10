@@ -21,12 +21,12 @@
 
 package ws2811
 
-// #cgo CFLAGS: -std=c99
+// #cgo CFLAGS: -std=c99 -I /usr/local/include/ws2811 -I /usr/include/ws2811
 // #cgo LDFLAGS: -lws2811 -lm
 // #include <stdint.h>
 // #include <stdlib.h>
 // #include <string.h>
-// #include <ws2811/ws2811.h>
+// #include <ws2811.h>
 import "C"
 
 import (
@@ -125,6 +125,11 @@ func (ws2811 *WS2811) Init() error {
 // SetBrightness changes the brightness of a given channel. Value between 0 and 255
 func (ws2811 *WS2811) SetBrightness(channel int, brightness int) {
 	ws2811.dev.channel[channel].brightness = C.uint8_t(brightness)
+}
+
+// SetCustomGammaFactor sets a custom Gamma correction array based on a gamma correction factor
+func (ws2811 *WS2811) SetCustomGammaFactor(gammaFactor float64) {
+	C.ws2811_set_custom_gamma_factor(ws2811.dev, C.double(gammaFactor))
 }
 
 // Render sends a complete frame to the LED Matrix
