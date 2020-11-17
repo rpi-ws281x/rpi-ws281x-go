@@ -17,7 +17,7 @@
 // libws2811.a in a GCC library path (e.g. /usr/local/lib).
 // See https://github.com/jgarff/rpi_ws281x for instructions
 
-// +build !arm
+// +build !arm,!arm64
 
 package ws2811
 
