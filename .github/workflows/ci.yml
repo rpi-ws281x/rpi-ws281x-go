@@ -6,16 +6,19 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Go 1.13
-      uses: actions/setup-go@v1
+
+    - name: Set up Go 1.15.6
+      uses: actions/setup-go@v2
       with:
-        go-version: '1.13' 
-    - name: Check out code into the Go module directory
+        go-version: '1.15.6' 
+
+    - name: Check out code
       uses: actions/checkout@v2
-    - name: Run GolangCI-Lint 
-      run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.23.3
-        ./bin/golangci-lint run --enable-all ./...
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.33.0
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
@@ -27,51 +30,53 @@ jobs:
       uses: docker/setup-buildx-action@v1
       with:
         version: latest
+
     - name: Builder instance name
       run: echo ${{ steps.buildx.outputs.name }}
+
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
-    - name: Run Buildx
+    
+    - name: Build ARM-V7 builder
       run: |
         docker buildx build \
           --platform linux/arm/v7 \
-          --tag rpi-ws281x-builder \
+          --tag rpi-ws281x-builder-armv7 \
           --load \
-          --file Dockerfile .
+          --file ./docker/ci-builder/Dockerfile .
 
-    - name: Build Swiss examples
+    - name: Build examples (arm-v7)
       run: |
-        docker run --rm -v "$(pwd)"/examples/swiss:/go/src/swiss rpi-ws281x-builder go build -o src/swiss/swiss -v swiss
-    - name: Upload swiss binary
-      uses: actions/upload-artifact@v1
-      with:
-        name: swiss
-        path: examples/swiss/swiss
+        for i in examples/*; do \
+          docker run --rm \
+            -v "$(pwd)/$i":/usr/src/$(basename $i) \
+            -w /usr/src/$(basename $i) \
+            rpi-ws281x-builder-armv7 \
+            go build -o $(basename $i)-armv7 -v .
+        done
 
-    - name: Build color_wipe examples
+    - name: Build ARM64 builder
       run: |
-        docker run --rm -v "$(pwd)"/examples/color_wipe:/go/src/color_wipe rpi-ws281x-builder go build -o src/color_wipe/color_wipe -v color_wipe
-    - name: Upload color_wipe binary
-      uses: actions/upload-artifact@v1
-      with:
-        name: color_wipe
-        path: examples/color_wipe/color_wipe
+        docker buildx build \
+          --platform linux/arm64 \
+          --tag rpi-ws281x-builder-arm64 \
+          --load \
+          --file ./docker/ci-builder/Dockerfile .
 
-    - name: Build hw examples
+    - name: Build examples (arm64)
       run: |
-        docker run --rm -v "$(pwd)"/examples/hw:/go/src/hw rpi-ws281x-builder go build -o src/hw/hw -v hw
-        docker run --rm -v "$(pwd)"/examples/invader8x8:/go/src/invader8x8 rpi-ws281x-builder go build -o src/invader8x8/invader8x8 -v invader8x8
-    - name: Upload hw binary
-      uses: actions/upload-artifact@v1
-      with:
-        name: hw
-        path: examples/hw/hw
+        for i in examples/*; do \
+          docker run --rm \
+            -v "$(pwd)/$i":/usr/src/$(basename $i) \
+            -w /usr/src/$(basename $i) \
+            rpi-ws281x-builder-arm64 \
+            go build -o $(basename $i)-arm64 -v .
+        done
 
-    - name: Build invader8x8 examples
-      run: |
-        docker run --rm -v "$(pwd)"/examples/invader8x8:/go/src/invader8x8 rpi-ws281x-builder go build -o src/invader8x8/invader8x8 -v invader8x8
-    - name: Upload invader8x8 binary
-      uses: actions/upload-artifact@v1
+    - name: Upload example binary
+      uses: actions/upload-artifact@v2
       with:
-        name: invader8x8
-        path: examples/invader8x8/invader8x8
+        name: examples
+        path: |
+          examples/*/*-armv7
+          examples/*/*-arm64

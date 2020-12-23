@@ -23,3 +23,6 @@ _testmain.go
 *.test
 *.prof
 .idea
+
+examples/*/*-armv7
+examples/*/*-arm64

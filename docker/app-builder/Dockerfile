@@ -22,4 +22,5 @@ RUN git clone https://github.com/jgarff/rpi_ws281x.git \
 FROM golang:latest
 COPY --from=lib_builder /usr/local/lib/libws2811.a /usr/local/lib/
 COPY --from=lib_builder /usr/local/include/ws2811 /usr/local/include/ws2811
-RUN go get -v -u github.com/rpi-ws281x/rpi-ws281x-go
+
+RUN go get github.com/rpi-ws281x/rpi-ws281x-go
