@@ -13,16 +13,17 @@
 // limitations under the License.
 
 // Interface to ws2811 chip (neopixel driver). Make sure that you have
-// ws2811.h and pwm.h in a GCC include path (e.g. /usr/local/include) and
-// libws2811.a in a GCC library path (e.g. /usr/local/lib).
+// https://github.com/jgarff/rpi_ws281x installed and discoverable by
+// pkg-config.
 // See https://github.com/jgarff/rpi_ws281x for instructions
 
 // +build arm arm64
 
 package ws2811
 
-// #cgo CFLAGS: -std=c99 -I /usr/local/include/ws2811 -I /usr/include/ws2811
-// #cgo LDFLAGS: -lws2811 -lm
+// #cgo linux pkg-config: libws2811
+// #cgo linux CFLAGS: -std=c99
+// #cgo linux LDFLAGS: -lm
 // #include <stdint.h>
 // #include <stdlib.h>
 // #include <string.h>
