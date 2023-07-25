@@ -34,6 +34,12 @@ jobs:
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
 
+      - name: Fix example to use local module
+        run: |
+          for i in examples/*; do \
+            echo "replace github.com/rpi-ws281x/rpi-ws281x-go => /go/src/rpi-ws281x-go/" >> $i/go.mod; \
+          done
+
       - name: Build ARM-V7 builder
         run: |
           docker buildx build \
@@ -58,7 +64,7 @@ jobs:
             --platform linux/arm64 \
             --tag rpi-ws281x-builder-arm64 \
             --load \
-            --file ./docker/ci-builder/Dockerfile .
+            --file ./docker/app-builder/Dockerfile .
 
       - name: Build examples (arm64)
         run: |
