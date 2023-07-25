@@ -6,77 +6,74 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Go 1.20.6
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20.6'
 
-    - name: Set up Go 1.15.6
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.15.6'
+      - name: Check out code
+        uses: actions/checkout@v3
 
-    - name: Check out code
-      uses: actions/checkout@v2
+      - name: pre-commit
+        uses: pre-commit/action@v3.0.0
 
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v2
-      with:
-        version: v1.33.0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
-      with:
-        platforms: all
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
 
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v1
-      with:
-        version: latest
+      - name: Builder instance name
+        run: echo ${{ steps.buildx.outputs.name }}
 
-    - name: Builder instance name
-      run: echo ${{ steps.buildx.outputs.name }}
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
 
-    - name: Available platforms
-      run: echo ${{ steps.buildx.outputs.platforms }}
+      - name: Build ARM-V7 builder
+        run: |
+          docker buildx build \
+            --platform linux/arm/v7 \
+            --tag rpi-ws281x-builder-armv7 \
+            --load \
+            --file ./docker/app-builder/Dockerfile .
 
-    - name: Build ARM-V7 builder
-      run: |
-        docker buildx build \
-          --platform linux/arm/v7 \
-          --tag rpi-ws281x-builder-armv7 \
-          --load \
-          --file ./docker/ci-builder/Dockerfile .
+      - name: Build examples (arm-v7)
+        run: |
+          for i in examples/*; do \
+            docker run --rm \
+              -v "$(pwd)/$i":/usr/src/$(basename $i) \
+              -w /usr/src/$(basename $i) \
+              rpi-ws281x-builder-armv7 \
+              go build -o $(basename $i)-armv7 -v .
+          done
 
-    - name: Build examples (arm-v7)
-      run: |
-        for i in examples/*; do \
-          docker run --rm \
-            -v "$(pwd)/$i":/usr/src/$(basename $i) \
-            -w /usr/src/$(basename $i) \
-            rpi-ws281x-builder-armv7 \
-            go build -o $(basename $i)-armv7 -v .
-        done
+      - name: Build ARM64 builder
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            --tag rpi-ws281x-builder-arm64 \
+            --load \
+            --file ./docker/ci-builder/Dockerfile .
 
-    - name: Build ARM64 builder
-      run: |
-        docker buildx build \
-          --platform linux/arm64 \
-          --tag rpi-ws281x-builder-arm64 \
-          --load \
-          --file ./docker/ci-builder/Dockerfile .
+      - name: Build examples (arm64)
+        run: |
+          for i in examples/*; do \
+            docker run --rm \
+              -v "$(pwd)/$i":/usr/src/$(basename $i) \
+              -w /usr/src/$(basename $i) \
+              rpi-ws281x-builder-arm64 \
+              go build -o $(basename $i)-arm64 -v .
+          done
 
-    - name: Build examples (arm64)
-      run: |
-        for i in examples/*; do \
-          docker run --rm \
-            -v "$(pwd)/$i":/usr/src/$(basename $i) \
-            -w /usr/src/$(basename $i) \
-            rpi-ws281x-builder-arm64 \
-            go build -o $(basename $i)-arm64 -v .
-        done
-
-    - name: Upload example binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: examples
-        path: |
-          examples/*/*-armv7
-          examples/*/*-arm64
+      - name: Upload example binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: examples
+          path: |
+            examples/*/*-armv7
+            examples/*/*-arm64
