@@ -1,4 +1,4 @@
-# Stage 0 : Build the C library 
+# Stage 0 : Build the C library
 
 FROM debian AS lib_builder
 
@@ -10,9 +10,9 @@ RUN apt-get update -y && apt-get install -y \
   git
 
 RUN git clone https://github.com/jgarff/rpi_ws281x.git \
-  && cd rpi_ws281x \ 
+  && cd rpi_ws281x \
   && mkdir build \
-  && cd build \ 
+  && cd build \
   && cmake -D BUILD_SHARED=OFF -D BUILD_TEST=OFF .. \
   && cmake --build . \
   && make install

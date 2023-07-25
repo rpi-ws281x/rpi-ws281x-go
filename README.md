@@ -101,9 +101,9 @@ Here is the result of the "Swiss" example:
 ## Special Thanks
 
 * Thank you to [Jeremy Garff](https://github.com/jgarff) for writing and maintaining the C library.
-* Thank you to all contributors (alphabetically): 
+* Thank you to all contributors (alphabetically):
   - [Alexandr Pavlyuk](https://github.com/pav5000)
-  - [Allen Flickinger](https://github.com/FuzzyStatic) 
+  - [Allen Flickinger](https://github.com/FuzzyStatic)
   - [Ben Watkins](https://github.com/OutdatedVersion)
   - [Chris C.](https://github.com/TwinProduction)
   - [Elie Grenon](https://github.com/DrunkenPoney)
