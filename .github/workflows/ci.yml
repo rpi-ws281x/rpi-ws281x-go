@@ -37,7 +37,7 @@ jobs:
       - name: Fix example to use local module
         run: |
           for i in examples/*; do \
-            echo "replace github.com/rpi-ws281x/rpi-ws281x-go => /go/src/rpi-ws281x-go/" >> $i/go.mod; \
+            echo "replace github.com/rpi-ws281x/rpi-ws281x-go => /go/src/rpi-ws281x-go/" >> $i/go.mod;
           done
 
       - name: Build ARM-V7 builder
@@ -52,6 +52,7 @@ jobs:
         run: |
           for i in examples/*; do \
             docker run --rm \
+              --platform linux/arm/v7 \
               -v "$(pwd)/$i":/usr/src/$(basename $i) \
               -w /usr/src/$(basename $i) \
               rpi-ws281x-builder-armv7 \
@@ -70,6 +71,7 @@ jobs:
         run: |
           for i in examples/*; do \
             docker run --rm \
+              --platform linux/arm64 \
               -v "$(pwd)/$i":/usr/src/$(basename $i) \
               -w /usr/src/$(basename $i) \
               rpi-ws281x-builder-arm64 \

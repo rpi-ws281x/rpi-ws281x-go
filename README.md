@@ -76,6 +76,13 @@ swiss-armv7: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV),
 
 As you can see, the resulting binary is an executable file for the ARM processor.
 
+Note that the example will use the `rpi-ws2811x-go` module from the github repository. If you want to use the module
+from the Docker image, you can add the following line to the `go.mod` file of the example:
+
+```text
+replace github.com/rpi-ws281x/rpi-ws281x-go => /go/src/rpi-ws281x-go/
+```
+
 ## Using the module
 
 In order to use this module, you have to understand the options of the underlying C library. Read [documentation of the C library](https://github.com/jgarff/rpi_ws281x) for more information.
